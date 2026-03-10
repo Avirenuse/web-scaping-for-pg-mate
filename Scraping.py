@@ -3,84 +3,90 @@ import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 
-# --- Configuration ---
-QUERY = "PG in sangli"
-OUTPUT = "pg_data.csv"
+# --- Setup ---
+QUERY = "PG in Sangli Maharashtra"
+OUTPUT = "sangli_all_pgs.csv"
 
 options = Options()
 # options.add_argument("--headless") 
 driver = webdriver.Chrome(options=options)
 
-def get_text_by_css(selector):
-    """Helper to find text safely"""
-    try:
-        element = driver.find_element(By.CSS_SELECTOR, selector)
-        return element.text
-    except:
-        return "Not Found"
-
-def scrape_google_maps():
+def scrape_sangli():
     driver.get(f"https://www.google.com/maps/search/{QUERY.replace(' ', '+')}")
-    wait = WebDriverWait(driver, 15)
+    time.sleep(5) # Wait for initial load
     
-    # 1. Wait for the list to load
-    wait.until(EC.presence_of_element_located((By.CLASS_NAME, "hfpxzc")))
+    # 1. SCROLLING LOOP - This forces Google to load ALL results
+    print("🔄 Scrolling to find all PGs... please wait.")
+    scrollable_div = driver.find_element(By.CSS_SELECTOR, 'div[role="feed"]')
+    
+    for _ in range(10): # Adjust range higher if you want even more results
+        driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", scrollable_div)
+        time.sleep(2) # Give it time to load new items
+
+    # 2. COLLECT ALL ITEMS
+    items = driver.find_elements(By.CLASS_NAME, "hfpxzc")
+    print(f"📊 Found {len(items)} listings. Starting extraction...")
     
     results = []
-    
-    # 2. Find all listing result links
-    listings = driver.find_elements(By.CLASS_NAME, "hfpxzc")
-    
-    for index, listing in enumerate(listings[:10]): # Start with 10 for testing
+
+    for index, item in enumerate(items):
         try:
-            # Scroll item into view and click
-            driver.execute_script("arguments[0].scrollIntoView();", listing)
-            time.sleep(1)
-            listing.click()
+            # Click the item to open details
+            driver.execute_script("arguments[0].click();", item)
+            time.sleep(2.5) # Wait for the side panel to refresh
+
+            # Extract Name
+            try:
+                name = driver.find_element(By.CSS_SELECTOR, "h1.DUwDvf").text
+            except:
+                name = "Unknown Name"
+
+            # Extract Address & Phone using specific data-item-ids
+            address = "NA"
+            phone = "NA"
             
-            # 3. Wait specifically for the Title of the PG to appear in the side panel
-            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "h1.DUwDvf")))
-            time.sleep(2) # Extra buffer for address/phone to load
-            
-            # --- EXTRACTION ---
-            name = get_text_by_css("h1.DUwDvf")
-            
-            # Google Maps stores Address/Phone in a common class 'Io6YTe'
-            # We search all elements with that class and pick by context
-            info_elements = driver.find_elements(By.CLASS_NAME, "Io6YTe")
-            
-            address = "Not Found"
-            phone = "Not Found"
-            
-            for el in info_elements:
-                text = el.text
-                if len(text) > 5 and "," in text: # Likely an address
-                    address = text
-                if text.replace(" ", "").replace("+", "").isdigit() or text.startswith("+"):
-                    phone = text
+            # Google Maps uses specific IDs for these buttons
+            try:
+                addr_element = driver.find_element(By.CSS_SELECTOR, "[data-item-id='address']")
+                address = addr_element.text
+            except:
+                pass
+
+            try:
+                phone_element = driver.find_element(By.CSS_SELECTOR, "[data-tooltip='Copy phone number']")
+                phone = phone_element.text
+            except:
+                # Secondary check for phone if the button isn't there
+                info_elements = driver.find_elements(By.CLASS_NAME, "Io6YTe")
+                for el in info_elements:
+                    if el.text.replace(" ", "").replace("+", "").isdigit():
+                        phone = el.text
 
             results.append({
                 "PG Name": name,
                 "Address": address,
                 "Contact No": phone,
-                "Location Link": driver.current_url
+                "Map Link": driver.current_url
             })
-            print(f"[{index+1}] Saved: {name}")
+            print(f"[{index + 1}] Scraped: {name} | Phone: {phone}")
 
         except Exception as e:
-            print(f"[{index+1}] Failed to extract details. Skipping...")
+            print(f"[{index + 1}] Error on this item, skipping...")
             continue
 
     return results
 
-# --- Run ---
-data = scrape_google_maps()
-if data:
-    pd.DataFrame(data).to_csv(OUTPUT, index=False)
-    print(f"\n✅ Success! Check {OUTPUT}")
+# --- Run and Save ---
+final_list = scrape_sangli()
+
+if final_list:
+    df = pd.DataFrame(final_list)
+    # Remove duplicates to be safe
+    df = df.drop_duplicates(subset=['PG Name', 'Address'])
+    df.to_csv(OUTPUT, index=False)
+    print(f"\n✅ Finished! {len(df)} PGs saved to {OUTPUT}")
 else:
     print("No data found.")
 
