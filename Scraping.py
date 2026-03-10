@@ -3,90 +3,76 @@ import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.action_chains import ActionChains
 
 # --- Setup ---
 QUERY = "PG in Sangli Maharashtra"
-OUTPUT = "sangli_all_pgs.csv"
+OUTPUT = "sangli_pg_clean.csv"
 
 options = Options()
-# options.add_argument("--headless") 
 driver = webdriver.Chrome(options=options)
 
-def scrape_sangli():
+def scrape_clean_data():
     driver.get(f"https://www.google.com/maps/search/{QUERY.replace(' ', '+')}")
-    time.sleep(5) # Wait for initial load
+    time.sleep(5)
     
-    # 1. SCROLLING LOOP - This forces Google to load ALL results
-    print("🔄 Scrolling to find all PGs... please wait.")
+    # Scroll to load listings
     scrollable_div = driver.find_element(By.CSS_SELECTOR, 'div[role="feed"]')
-    
-    for _ in range(10): # Adjust range higher if you want even more results
+    for _ in range(8): # Scroll 8 times to get a good list
         driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", scrollable_div)
-        time.sleep(2) # Give it time to load new items
+        time.sleep(2)
 
-    # 2. COLLECT ALL ITEMS
     items = driver.find_elements(By.CLASS_NAME, "hfpxzc")
-    print(f"📊 Found {len(items)} listings. Starting extraction...")
-    
     results = []
 
     for index, item in enumerate(items):
         try:
-            # Click the item to open details
             driver.execute_script("arguments[0].click();", item)
-            time.sleep(2.5) # Wait for the side panel to refresh
+            time.sleep(2.5) 
 
-            # Extract Name
+            # 1. Get Name
             try:
                 name = driver.find_element(By.CSS_SELECTOR, "h1.DUwDvf").text
             except:
-                name = "Unknown Name"
+                name = "NA"
 
-            # Extract Address & Phone using specific data-item-ids
+            # 2. Get Address & Phone (Better Logic to avoid emojis)
             address = "NA"
             phone = "NA"
             
-            # Google Maps uses specific IDs for these buttons
-            try:
-                addr_element = driver.find_element(By.CSS_SELECTOR, "[data-item-id='address']")
-                address = addr_element.text
-            except:
-                pass
-
-            try:
-                phone_element = driver.find_element(By.CSS_SELECTOR, "[data-tooltip='Copy phone number']")
-                phone = phone_element.text
-            except:
-                # Secondary check for phone if the button isn't there
-                info_elements = driver.find_elements(By.CLASS_NAME, "Io6YTe")
-                for el in info_elements:
-                    if el.text.replace(" ", "").replace("+", "").isdigit():
-                        phone = el.text
+            # We look for the specific 'aria-label' which contains clean text
+            info_elements = driver.find_elements(By.CLASS_NAME, "CsS9M") 
+            
+            for el in info_elements:
+                text_content = el.text
+                # Address usually contains commas
+                if "," in text_content and len(text_content) > 10:
+                    address = text_content
+                # Phone contains numbers
+                clean_phone = text_content.replace(" ", "").replace("+", "").replace("-", "")
+                if clean_phone.isdigit() and len(clean_phone) >= 10:
+                    phone = text_content
 
             results.append({
-                "PG Name": name,
-                "Address": address,
-                "Contact No": phone,
-                "Map Link": driver.current_url
+                "Sr. no": index + 1,
+                "PG name": name,
+                "Contact No Pg": phone,
+                "Located Area": address,
+                "Link": driver.current_url
             })
-            print(f"[{index + 1}] Scraped: {name} | Phone: {phone}")
+            print(f"Captured {index+1}: {name}")
 
         except Exception as e:
-            print(f"[{index + 1}] Error on this item, skipping...")
             continue
 
     return results
 
-# --- Run and Save ---
-final_list = scrape_sangli()
-
-if final_list:
-    df = pd.DataFrame(final_list)
-    # Remove duplicates to be safe
-    df = df.drop_duplicates(subset=['PG Name', 'Address'])
-    df.to_csv(OUTPUT, index=False)
-    print(f"\n✅ Finished! {len(df)} PGs saved to {OUTPUT}")
+# --- Run and Save with Excel-friendly encoding ---
+data = scrape_clean_data()
+if data:
+    df = pd.DataFrame(data)
+    # 'utf-8-sig' prevents those weird symbols from appearing in Excel
+    df.to_csv(OUTPUT, index=False, encoding='utf-8-sig')
+    print(f"\n✅ Clean data saved to {OUTPUT}")
 else:
     print("No data found.")
 
