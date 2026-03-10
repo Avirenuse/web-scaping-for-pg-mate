@@ -1,6 +1,6 @@
 import requests
 import pandas as pd
-API_KEY = "AIzaSyAvSR7PVcIiC-Te4QM3m4CA03s6QCQQYlY"
+API_KEY = "YOUR_GOOGLE_MAPS_API_KEY"
 
 location = "Sangli"
 query = "PG hostel in " + location
