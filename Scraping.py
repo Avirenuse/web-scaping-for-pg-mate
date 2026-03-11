@@ -4,76 +4,90 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 
-# --- Setup ---
 QUERY = "PG in Sangli Maharashtra"
 OUTPUT = "sangli_pg_clean.csv"
 
 options = Options()
+options.add_argument("--start-maximized")
+
 driver = webdriver.Chrome(options=options)
 
+
 def scrape_clean_data():
-    driver.get(f"https://www.google.com/maps/search/{QUERY.replace(' ', '+')}")
+
+    driver.get(f"https://www.google.com/maps/search/{QUERY.replace(' ','+')}")
     time.sleep(5)
-    
-    # Scroll to load listings
+
+    # Scroll listing panel
     scrollable_div = driver.find_element(By.CSS_SELECTOR, 'div[role="feed"]')
-    for _ in range(8): # Scroll 8 times to get a good list
-        driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", scrollable_div)
+
+    for _ in range(10):
+        driver.execute_script(
+            "arguments[0].scrollTop = arguments[0].scrollHeight", scrollable_div
+        )
         time.sleep(2)
 
-    items = driver.find_elements(By.CLASS_NAME, "hfpxzc")
+    items = driver.find_elements(By.CSS_SELECTOR, "a.hfpxzc")
+
     results = []
 
     for index, item in enumerate(items):
+
         try:
             driver.execute_script("arguments[0].click();", item)
-            time.sleep(2.5) 
+            time.sleep(3)
 
-            # 1. Get Name
+            # PG Name
             try:
                 name = driver.find_element(By.CSS_SELECTOR, "h1.DUwDvf").text
             except:
                 name = "NA"
 
-            # 2. Get Address & Phone (Better Logic to avoid emojis)
             address = "NA"
             phone = "NA"
-            
-            # We look for the specific 'aria-label' which contains clean text
-            info_elements = driver.find_elements(By.CLASS_NAME, "CsS9M") 
-            
-            for el in info_elements:
-                text_content = el.text
-                # Address usually contains commas
-                if "," in text_content and len(text_content) > 10:
-                    address = text_content
-                # Phone contains numbers
-                clean_phone = text_content.replace(" ", "").replace("+", "").replace("-", "")
-                if clean_phone.isdigit() and len(clean_phone) >= 10:
-                    phone = text_content
 
-            results.append({
-                "Sr. no": index + 1,
-                "PG name": name,
-                "Contact No Pg": phone,
-                "Located Area": address,
-                "Link": driver.current_url
-            })
+            # Address
+            try:
+                address = driver.find_element(
+                    By.CSS_SELECTOR, 'button[data-item-id="address"]'
+                ).text
+            except:
+                pass
+
+            # Phone
+            try:
+                phone = driver.find_element(
+                    By.CSS_SELECTOR, 'button[data-item-id^="phone"]'
+                ).text
+            except:
+                pass
+
+            results.append(
+                {
+                    "Sr No": index + 1,
+                    "PG Name": name,
+                    "Address": address,
+                    "Contact No": phone,
+                    "Map Link": driver.current_url,
+                }
+            )
+
             print(f"Captured {index+1}: {name}")
 
         except Exception as e:
+            print("Error:", e)
             continue
 
     return results
 
-# --- Run and Save with Excel-friendly encoding ---
+
 data = scrape_clean_data()
+
 if data:
     df = pd.DataFrame(data)
-    # 'utf-8-sig' prevents those weird symbols from appearing in Excel
-    df.to_csv(OUTPUT, index=False, encoding='utf-8-sig')
-    print(f"\n✅ Clean data saved to {OUTPUT}")
+    df.to_csv(OUTPUT, index=False, encoding="utf-8-sig")
+    print("\n✅ Data saved to", OUTPUT)
 else:
-    print("No data found.")
+    print("No data found")
 
 driver.quit()
