@@ -6,8 +6,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 
 # --- Setup ---
-QUERY = "PG in Sangli Maharashtra"
-OUTPUT = "sangli_all_pgs.csv"
+QUERY = "PG in Vadodara Gujarat"
+OUTPUT = "Vadodara_all_pgs.csv"
 
 options = Options()
 # options.add_argument("--headless") 
