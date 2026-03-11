@@ -1,11 +1,12 @@
 import pandas as pd
 import time
+import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 
 QUERY = "PG in Sangli Maharashtra"
-OUTPUT = "sangli_pg_clean.csv"
+OUTPUT = "sangli_pg.csv"
 
 options = Options()
 options.add_argument("--start-maximized")
@@ -13,12 +14,24 @@ options.add_argument("--start-maximized")
 driver = webdriver.Chrome(options=options)
 
 
+# ---- CLEAN TEXT FUNCTION ----
+def clean_text(text):
+    if not text:
+        return "NA"
+    
+    text = text.strip()
+    
+    # remove emojis / special icons
+    text = re.sub(r'[^\x00-\x7F]+', '', text)
+
+    return text
+
+
 def scrape_clean_data():
 
     driver.get(f"https://www.google.com/maps/search/{QUERY.replace(' ','+')}")
     time.sleep(5)
 
-    # Scroll listing panel
     scrollable_div = driver.find_element(By.CSS_SELECTOR, 'div[role="feed"]')
 
     for _ in range(10):
@@ -39,28 +52,25 @@ def scrape_clean_data():
 
             # PG Name
             try:
-                name = driver.find_element(By.CSS_SELECTOR, "h1.DUwDvf").text
+                name = clean_text(driver.find_element(By.CSS_SELECTOR, "h1.DUwDvf").text)
             except:
                 name = "NA"
 
-            address = "NA"
-            phone = "NA"
-
             # Address
             try:
-                address = driver.find_element(
-                    By.CSS_SELECTOR, 'button[data-item-id="address"]'
-                ).text
+                address = clean_text(
+                    driver.find_element(By.CSS_SELECTOR, 'button[data-item-id="address"]').text
+                )
             except:
-                pass
+                address = "NA"
 
             # Phone
             try:
-                phone = driver.find_element(
-                    By.CSS_SELECTOR, 'button[data-item-id^="phone"]'
-                ).text
+                phone = clean_text(
+                    driver.find_element(By.CSS_SELECTOR, 'button[data-item-id^="phone"]').text
+                )
             except:
-                pass
+                phone = "NA"
 
             results.append(
                 {
@@ -74,8 +84,7 @@ def scrape_clean_data():
 
             print(f"Captured {index+1}: {name}")
 
-        except Exception as e:
-            print("Error:", e)
+        except Exception:
             continue
 
     return results
@@ -86,8 +95,6 @@ data = scrape_clean_data()
 if data:
     df = pd.DataFrame(data)
     df.to_csv(OUTPUT, index=False, encoding="utf-8-sig")
-    print("\n✅ Data saved to", OUTPUT)
-else:
-    print("No data found")
+    print("\n✅ Clean data saved to", OUTPUT)
 
 driver.quit()
