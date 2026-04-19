@@ -1,0 +1,913 @@
+ <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>StudySmart Ai</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <style>
+/* New dark purple / navy theme (keeps all HTML & JS unchanged) */
+
+/* MODERN REDESIGN - Clean, minimalist aesthetic */
+/* All HTML structure and JS remain unchanged */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary: #4361ee;
+  --primary-dark: #3a56d4;
+  --secondary: #7209b7;
+  --accent: #f72585;
+  --light: #f8f9fa;
+  --dark: #212529;
+  --gray-100: #f1f3f5;
+  --gray-200: #e9ecef;
+  --gray-300: #dee2e6;
+  --gray-600: #6c757d;
+  --gray-800: #343a40;
+  --success: #4cc9f0;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+html, body {
+  height: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+  color: var(--dark);
+  line-height: 1.6;
+  overflow-x: hidden;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Subtle background pattern */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(67, 97, 238, 0.05) 0%, transparent 20%),
+    radial-gradient(circle at 85% 30%, rgba(114, 9, 183, 0.05) 0%, transparent 20%),
+    radial-gradient(circle at 50% 80%, rgba(247, 37, 133, 0.05) 0%, transparent 20%);
+  z-index: -1;
+}
+
+/* NAVIGATION - Modern clean header */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-sm);
+  z-index: 1000;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  animation: fadeInDown 0.5s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.nav-container {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 100%;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--primary);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.nav-logo:hover {
+  color: var(--primary-dark);
+}
+
+.nav-logo i {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 1.8rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  list-style: none;
+}
+
+.nav-links a {
+  color: var(--gray-800);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 10px 0;
+  position: relative;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: var(--primary);
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+.nav-links a i {
+  font-size: 1.1rem;
+}
+
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.nav-toggle span {
+  height: 3px;
+  width: 100%;
+  background-color: var(--primary);
+  border-radius: 2px;
+  transition: var(--transition);
+}
+
+/* MAIN CONTENT */
+main {
+  padding-top: 120px;
+  padding-bottom: 80px;
+  position: relative;
+  z-index: 1;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* HEADINGS */
+h1 {
+  text-align: center;
+  color: var(--dark);
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  line-height: 1.2;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+h2 {
+  color: var(--dark);
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+h3 {
+  color: var(--dark);
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* FORMS - Clean modern design */
+form {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 32px;
+  border: 1px solid var(--gray-200);
+  transition: var(--transition);
+}
+
+form:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  font-size: 1rem;
+}
+
+input[type="file"], textarea, select {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-300);
+  background: white;
+  color: var(--dark);
+  font-family: inherit;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  transition: var(--transition);
+}
+
+input[type="file"]:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+
+textarea {
+  min-height: 140px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+input[type="file"]::file-selector-button {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-right: 16px;
+}
+
+input[type="file"]::file-selector-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* BUTTONS - Modern gradient buttons */
+button, .control-btn {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  padding: 16px 28px;
+  border-radius: var(--radius-md);
+  border: none;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  letter-spacing: 0.5px;
+  box-shadow: var(--shadow-sm);
+}
+
+button:hover, .control-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
+}
+
+button:active, .control-btn:active {
+  transform: translateY(-1px);
+}
+
+/* HR */
+hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--gray-300), transparent);
+  margin: 40px 0;
+}
+
+/* PREVIEW AREA */
+pre {
+  background: var(--gray-100);
+  padding: 20px;
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--primary);
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 20px 0;
+  color: var(--gray-800);
+}
+
+/* FLASHCARD STACK - Modern card design */
+.flashcards-container {
+  perspective: 1200px;
+  max-width: 800px;
+  margin: 40px auto;
+  height: 500px;
+  position: relative;
+}
+
+.card-stack {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: white;
+  color: var(--dark);
+  border-radius: var(--radius-xl);
+  padding: 40px;
+  box-shadow: var(--shadow-lg);
+  transform-origin: center center;
+  transition: var(--transition);
+  transform: 
+    translateY(calc(var(--index) * 12px)) 
+    scale(calc(1 - var(--index) * 0.03));
+  z-index: calc(100 - var(--index));
+  opacity: calc(1 - var(--index) * 0.15);
+  pointer-events: none;
+  border: 1px solid var(--gray-200);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.card.active {
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.card.active:active {
+  cursor: grabbing;
+}
+
+/* Card content styling */
+.card-label {
+  font-size: 0.85rem;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.card-question {
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1.3;
+  margin-bottom: 24px;
+  color: var(--dark);
+}
+
+.card-answer {
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--gray-800);
+}
+
+/* Flipped state */
+.card.flipped .card-question {
+  display: none;
+}
+
+.card:not(.flipped) .card-answer {
+  display: none;
+}
+
+/* Card color variants */
+.card:nth-child(1) {
+  background: linear-gradient(135deg, white, #f8f9ff);
+}
+
+.card:nth-child(2n) {
+  background: linear-gradient(135deg, white, #f9f8ff);
+}
+
+.card:nth-child(3n) {
+  background: linear-gradient(135deg, white, #f8fbff);
+}
+
+/* CONTROLS */
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+
+.control-btn {
+  padding: 14px 24px;
+  min-width: 140px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+}
+
+#flipBtn {
+  background: linear-gradient(135deg, var(--secondary), #5a08a3);
+}
+
+#prevBtn, #nextBtn {
+  background: linear-gradient(135deg, var(--gray-600), var(--gray-800));
+}
+
+/* PROGRESS */
+.progress {
+  color: var(--gray-800);
+  text-align: center;
+  margin-top: 24px;
+  font-weight: 700;
+}
+
+.progress-bar {
+  background: var(--gray-200);
+  height: 8px;
+  border-radius: 4px;
+  margin-top: 12px;
+  overflow: hidden;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.progress-fill {
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  height: 100%;
+  transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border-radius: 4px;
+}
+
+/* INFO TEXT */
+.info-text {
+  color: var(--gray-600);
+  text-align: center;
+  margin-top: 20px;
+  font-weight: 500;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 0.95rem;
+}
+
+/* FLASHCARD LINK BUTTON */
+.flashcard-btn-container {
+  text-align: center;
+  margin: 32px 0;
+}
+
+.flashcard-btn-container a {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 36px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 1.1rem;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition);
+}
+
+.flashcard-btn-container a:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 992px) {
+  .nav-links {
+    gap: 20px;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+  }
+  
+  .flashcards-container {
+    height: 450px;
+    max-width: 90%;
+  }
+  
+  .card {
+    padding: 30px;
+  }
+  
+  .card-question {
+    font-size: 1.8rem;
+  }
+  
+  .card-answer {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-toggle {
+    display: flex;
+  }
+  
+  .nav-links {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    width: 100%;
+    background: white;
+    flex-direction: column;
+    padding: 20px;
+    box-shadow: var(--shadow-md);
+    transform: translateY(-100%);
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition);
+    z-index: 999;
+  }
+  
+  .nav-links.active {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  form {
+    padding: 24px;
+  }
+  
+  .flashcards-container {
+    height: 400px;
+  }
+  
+  .controls {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .control-btn {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .card-question {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .container {
+    padding: 0 16px;
+  }
+  
+  h1 {
+    font-size: 1.8rem;
+  }
+  
+  .flashcards-container {
+    height: 350px;
+  }
+  
+  .card {
+    padding: 24px;
+  }
+  
+  .card-question {
+    font-size: 1.4rem;
+  }
+  
+  .card-answer {
+    font-size: 1.1rem;
+  }
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+form, .flashcards-container {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--gray-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
+}
+
+/* Selection color */
+::selection {
+  background-color: rgba(67, 97, 238, 0.2);
+  color: var(--dark);
+}
+    </style>
+    <script src="https://kit.fontawesome.com/041b13c134.js" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <!-- Navigation Bar -->
+    <nav>
+      <div class="nav-container">
+        <div class="nav-logo"><i class="fa-solid fa-graduation-cap"> </i> StudySmart AI</div>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="#home"><i class="fa-solid fa-house-chimney-user"></i> Home</a></li>
+          <li><a href="#upload"><i class="fa-solid fa-upload"></i> Upload</a></li>
+          <li><a href="/flashcards"><i class="fa-solid fa-clone"></i> Flashcards</a></li>
+          <li><a href="https://avirenuse.github.io/Portfolio"><i class="fa-solid fa-user"></i> About</a></li>
+        </ul>
+        <div class="nav-toggle" id="navToggle">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <div class="container">
+        <h1 id="home"><i class="fa-solid fa-graduation-cap"></i> StudySmart AI</h1>
+
+        <form method="post" enctype="multipart/form-data" id="upload">
+          <label>📷 Upload Image (PNG/JPG/pdf):</label><br />
+          <input type="file" name="image" accept="image/*,application/pdf" /><br />
+
+          <label style="margin-top: 1rem"
+            >🎯 Number of Flashcards to Generate:</label
+          >
+          <select name="num_cards" required>
+            <option value="5">5 Flashcards</option>
+            <option value="10">10 Flashcards</option>
+            <option value="15">15 Flashcards</option>
+            <option value="20">20 Flashcards</option>
+            <option value="25">25 Flashcards</option>
+            <option value="30">30 Flashcards</option>
+          </select>
+
+          <button type="submit" id="extractBtn">✨ Generate Flashcards</button>
+        </form>
+
+        <hr />
+
+        <h3>📝 Or Paste Text:</h3>
+        <form method="post">
+          <label>Enter your study text:</label>
+          <textarea
+            name="flash_text"
+            placeholder="Paste your OCR text or any study material here..."
+          ></textarea
+          ><br />
+
+          <label style="margin-top: 1rem"
+            >🎯 Number of Flashcards to Generate:</label
+          >
+          <select name="num_cards" required>
+            <option value="5">5 Flashcards</option>
+            <option value="10">10 Flashcards</option>
+            <option value="15">15 Flashcards</option>
+            <option value="20">20 Flashcards</option>
+            <option value="25">25 Flashcards</option>
+            <option value="30">30 Flashcards</option>
+          </select>
+
+          <button type="submit">🚀 Generate Flashcards from Text</button>
+        </form>
+
+        <hr />
+        {% if flashcards %}
+        <div class="flashcard-btn-container">
+          <a href="/flashcards">📖 View Full Flashcards Page</a>
+        </div>
+        {% endif %}
+        <!--{% if extracted_text %}
+    <h2>📄 Extracted / Provided Text</h2>
+    <pre style="white-space:pre-wrap;">{{ extracted_text }}</pre>
+    {% endif %}-->
+
+     <!--   {% if flashcards %}
+        <h2 id="flashcards">🎯 Your Interactive Flashcards</h2>
+
+        <div class="flashcards-container">
+          <div class="card-stack" id="cardStack">
+            {% for c in flashcards %}
+            <div class="card active" data-index="{{ loop.index0 }}">
+              <div class="card-content">
+                <div class="card-label">
+                  Question {{ loop.index }} / {{ flashcards|length }}
+                </div>
+                <div class="card-question">{{ c.q }}</div>
+                <div class="card-label">← Click to reveal answer →</div>
+                <div class="card-answer">{{ c.a }}</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="control-btn" id="prevBtn">← Previous</button>
+          <button class="control-btn" id="flipBtn">🔄 Flip Card</button>
+          <button class="control-btn" id="nextBtn">Next →</button>
+        </div>-->
+
+       <!-- <div class="progress">
+          <span id="progressText">Card 1 of {{ flashcards|length }}</span>
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              id="progressFill"
+              style="width: calc(1 / {{ flashcards|length }} * 100%)"
+            ></div>
+          </div>
+        </div>
+
+        <div class="info-text">
+          💡 Click cards to flip • Use buttons to navigate • Swipe on mobile
+          devices
+        </div>
+        {% endif %}--> 
+
+      </div>
+    </main>
+
+    <script>
+
+      // Mobile Navigation Toggle
+      const navToggle = document.getElementById("navToggle");
+      const navLinks = document.getElementById("navLinks");
+      $(document).ready(function(){$("#extractBtn").click(function(){alert("Flashcards are being generated. This may take a moment."); });});
+      
+      navToggle.addEventListener("click", () => {
+        navToggle.classList.toggle("active");
+        navLinks.classList.toggle("active");
+      });
+
+      // Close menu when link is clicked
+      document.querySelectorAll(".nav-links a").forEach((link) => {
+        link.addEventListener("click", () => {
+          navToggle.classList.remove("active");
+          navLinks.classList.remove("active");
+        });
+      });
+
+      // Flashcard Logic
+      let currentIndex = 0;
+      const cards = document.querySelectorAll(".card");
+      const totalCards = cards.length;
+
+      if (totalCards > 0) {
+        function updateCard() {
+          cards.forEach((card, idx) => {
+            card.style.setProperty("--index", Math.abs(idx - currentIndex));
+            card.classList.remove("active");
+            if (idx === currentIndex) {
+              card.classList.add("active");
+            }
+          });
+          updateProgress();
+        }
+
+        function updateProgress() {
+          const progressText = document.getElementById("progressText");
+          const progressFill = document.getElementById("progressFill");
+          progressText.textContent = `Card ${
+            currentIndex + 1
+          } of ${totalCards}`;
+          progressFill.style.width = `calc(${
+            currentIndex + 1
+          } / ${totalCards} * 100%)`;
+        }
+
+        document.getElementById("nextBtn").addEventListener("click", () => {
+          if (currentIndex < totalCards - 1) {
+            cards[currentIndex].classList.add("exit-right");
+            setTimeout(() => {
+              cards[currentIndex].classList.remove("exit-right", "flipped");
+              currentIndex++;
+              cards[currentIndex].classList.add("enter");
+              updateCard();
+            }, 300);
+          }
+        });
+
+        document.getElementById("prevBtn").addEventListener("click", () => {
+          if (currentIndex > 0) {
+            cards[currentIndex].classList.add("exit-left");
+            setTimeout(() => {
+              cards[currentIndex].classList.remove("exit-left", "flipped");
+              currentIndex--;
+              cards[currentIndex].classList.add("enter");
+              updateCard();
+            }, 300);
+          }
+        });
+
+        document.getElementById("flipBtn").addEventListener("click", () => {
+          cards[currentIndex].classList.toggle("flipped");
+        });
+
+        cards.forEach((card) => {
+          card.addEventListener("click", () => {
+            if (card.classList.contains("active")) {
+              card.classList.toggle("flipped");
+            }
+          });
+        });
+
+        let touchStartX = 0;
+        const container = document.querySelector(".flashcards-container");
+        if (container) {
+          container.addEventListener("touchstart", (e) => {
+            touchStartX = e.touches[0].clientX;
+          });
+
+          container.addEventListener("touchend", (e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            if (touchStartX - touchEndX > 50) {
+              document.getElementById("nextBtn").click();
+            } else if (touchEndX - touchStartX > 50) {
+              document.getElementById("prevBtn").click();
+            }
+          });
+        }
+
+        updateCard();
+      }
+    </script>
+  </body>
+</html>

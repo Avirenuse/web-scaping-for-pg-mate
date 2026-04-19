@@ -1,0 +1,12 @@
+flask
+flask-sqlalchemy
+flask-migrate
+sentence-transformers
+pillow
+faiss-cpu
+google-generative-ai
+python-dotenv
+pymysql
+flask-cors
+# optional fallback
+pytesseract
